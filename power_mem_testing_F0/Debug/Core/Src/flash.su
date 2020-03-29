@@ -1,0 +1,8 @@
+flash.c:22:6:ReadFlash	32	static
+flash.c:41:6:WriteFlash	32	static
+flash.c:67:6:ErasePage	32	static
+flash.c:94:6:WriteSettings	24	static
+flash.c:111:6:ReadSettings	24	static
+flash.c:118:6:_UpdateSettings	8	static
+flash.c:123:6:_WaitForReady	16	static
+flash.c:137:6:_SeparateBytes	40	static
