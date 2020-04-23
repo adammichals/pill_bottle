@@ -10,10 +10,10 @@
   * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
@@ -50,8 +50,6 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -60,20 +58,31 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define DIR_Pin GPIO_PIN_2
-#define DIR_GPIO_Port GPIOA
-#define nENBL_Pin GPIO_PIN_3
-#define nENBL_GPIO_Port GPIOA
-#define nFAULT_Pin GPIO_PIN_2
-#define nFAULT_GPIO_Port GPIOB
+#define JOY_CENTER_Pin GPIO_PIN_0
+#define JOY_CENTER_GPIO_Port GPIOA
+#define JOY_CENTER_EXTI_IRQn EXTI0_IRQn
+#define JOY_LEFT_Pin GPIO_PIN_1
+#define JOY_LEFT_GPIO_Port GPIOA
+#define JOY_RIGHT_Pin GPIO_PIN_2
+#define JOY_RIGHT_GPIO_Port GPIOA
+#define JOY_UP_Pin GPIO_PIN_3
+#define JOY_UP_GPIO_Port GPIOA
+#define JOY_DOWN_Pin GPIO_PIN_5
+#define JOY_DOWN_GPIO_Port GPIOA
+#define LD_R_Pin GPIO_PIN_2
+#define LD_R_GPIO_Port GPIOB
+#define LD_G_Pin GPIO_PIN_8
+#define LD_G_GPIO_Port GPIOE
 #define flash_nSS_Pin GPIO_PIN_12
 #define flash_nSS_GPIO_Port GPIOE
-#define nSLEEP_Pin GPIO_PIN_0
-#define nSLEEP_GPIO_Port GPIOD
-#define M0_Pin GPIO_PIN_6
-#define M0_GPIO_Port GPIOB
-#define M1_Pin GPIO_PIN_7
-#define M1_GPIO_Port GPIOB
+#define SWDIO_Pin GPIO_PIN_13
+#define SWDIO_GPIO_Port GPIOA
+#define SWCLK_Pin GPIO_PIN_14
+#define SWCLK_GPIO_Port GPIOA
+#define DIR_Pin GPIO_PIN_0
+#define DIR_GPIO_Port GPIOD
+#define M3V3_REG_ON_Pin GPIO_PIN_3
+#define M3V3_REG_ON_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

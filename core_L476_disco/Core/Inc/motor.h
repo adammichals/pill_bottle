@@ -8,7 +8,7 @@
 #ifndef INC_MOTOR_H_
 #define INC_MOTOR_H_
 
-#include "stm32f0xx_hal.h"
+#include "stm32l4xx_hal.h"
 
 #define DIR_FORWARD 0
 #define DIR_BACKWARD 1

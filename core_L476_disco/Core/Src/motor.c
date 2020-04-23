@@ -7,7 +7,7 @@
 
 #include "motor.h"
 #include "main.h"
-#include "stm32f0xx_hal.h"
+#include "stm32l4xx_hal.h"
 
 uint16_t set_motor_steps = 0; // will be used externally
 
@@ -20,7 +20,7 @@ void Move(uint8_t dir, uint16_t steps)
 	HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, (dir == DIR_FORWARD) ? GPIO_PIN_RESET : GPIO_PIN_SET);
 
 	// start timer to move motor
-	TIM1->CR1 |= 0x0001;
+	TIM2->CR1 |= 0x0001;
 }
 
 void Move_Eighth(uint8_t dir)

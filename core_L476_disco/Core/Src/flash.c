@@ -7,9 +7,11 @@
 
 #include "flash.h"
 #include "main.h"
-#include "stm32f0xx_hal.h"
+#include "stm32l4xx_hal.h"
 
 extern SPI_HandleTypeDef hspi1;
+extern RTC_HandleTypeDef hrtc;
+uint16_t log_addr = ADDRESS_START_LOG;
 
 /*
  * Name:	ReadFlash
@@ -84,40 +86,116 @@ void ErasePage(uint8_t pageNum)
 }
 
 /*
- * Name:	WriteSettings
- * Use:		Write settings data to flash
- * Inputs:	-masterID:		array of SIZE_ID bytes with the master ID number
- * 			-patientID:		array of SIZE_ID bytes with the patient ID number
- * 			-dosagePeriod:	array of SIZE_PERIOD bytes with the time between doses in seconds (FIXME)
- * Outputs:	none
+ * Name:	WriteID
+ * Use:		Write master or patient ID number to flash
+ * Inputs:	-numID: 	the ID number to be written
+ * 			-typeID: 	USER_MASTER or USER_PATIENT
+ * Outputs:	0 if successful, 1 if error
  */
-void WriteSettings(uint8_t* masterID, uint8_t* patientID, uint8_t* dosagePeriod)
+uint8_t WriteID(uint8_t* numID, uint8_t typeID)
 {
-	ErasePage(PAGE_SETTINGS);
+	uint16_t addr;
+	uint8_t page;
+	if (typeID == USER_MASTER)
+	{
+		addr = ADDRESS_MASTER_ID;
+		page = PAGE_MASTER_ID;
+	}
+	else if (typeID == USER_PATIENT)
+	{
+		addr = ADDRESS_PATIENT_ID;
+		page = PAGE_PATIENT_ID;
+	}
+	else
+	{
+		return 1; // FIXME: error handling
+	}
 
-	WriteFlash(ADDRESS_MASTER, masterID, SIZE_ID);
-	WriteFlash(ADDRESS_PATIENT, patientID, SIZE_ID);
-	//WriteFlash(ADDRESS_PERIOD, dosagePeriod, SIZE_PERIOD);
+	ErasePage(page);
+	WriteFlash(addr, numID, SIZE_ID);
+
+	return 0;
 }
+
+
+/*
+ * Name:	WriteTiming
+ * Use:		Write timing data to flash
+ * Inputs:	-doses_per_day:	number of doses per day, 1-4
+ * 			-times:			array of times of doses
+ * Outputs:	0 if successful, 1 if error
+ */
+uint8_t WriteTiming(uint8_t doses_per_day, uint8_t* dose_times)
+{
+	if ( (doses_per_day < 1) || (doses_per_day > 4) )
+	{
+		return 1;
+	}
+
+	ErasePage(PAGE_TIMING);
+	WriteFlash(ADDRESS_DOSES_PER_DAY, &doses_per_day, 1);
+	WriteFlash(ADDRESS_TIME0, dose_times, doses_per_day*SIZE_TIME);
+
+	return 0;
+}
+
 
 /*
  * Name:	ReadSettings
  * Use:		Read settings data from flash
  * Inputs:	-masterID:		array of SIZE_ID bytes with the master ID number
  * 			-patientID:		array of SIZE_ID bytes with the patient ID number
- * 			-dosagePeriod:	array of SIZE_PERIOD bytes with the time between doses in seconds (FIXME)
+ * 			-doses_per_day:	byte with the number of doses per day
+ * 			-times:			array of doses_per_day times, each of SIZE_TIME bytes
  * Outputs:	none
  */
-void ReadSettings(uint8_t* masterID, uint8_t* patientID, uint8_t* dosagePeriod)
+void ReadSettings(uint8_t* masterID, uint8_t* patientID, uint8_t* doses_per_day, uint8_t* dose_times)
 {
-	ReadFlash(ADDRESS_MASTER, masterID, SIZE_ID);
-	ReadFlash(ADDRESS_PATIENT, patientID, SIZE_ID);
-	//ReadFlash(ADDRESS_PERIOD, dosagePeriod, SIZE_PERIOD);
+	ReadFlash(ADDRESS_MASTER_ID, masterID, SIZE_ID);
+	ReadFlash(ADDRESS_PATIENT_ID, patientID, SIZE_ID);
+	ReadFlash(ADDRESS_DOSES_PER_DAY, doses_per_day, SIZE_DOSES_PER_DAY);
+	ReadFlash(ADDRESS_TIME0, dose_times, *doses_per_day * SIZE_TIME);
 }
 
-void _UpdateSettings()
+/*
+ * Name:	ReadTiming
+ * Use:		Read timing data from flash
+ * Inputs:	-doses_per_day:	byte with the number of doses per day
+ * 			-times:			array of doses_per_day times, each of SIZE_TIME bytes
+ * Outputs:	none
+ */
+void ReadTiming(uint8_t* doses_per_day, uint8_t* dose_times)
 {
-	//  TODO
+	ReadFlash(ADDRESS_DOSES_PER_DAY, doses_per_day, SIZE_DOSES_PER_DAY);
+	ReadFlash(ADDRESS_TIME0, dose_times, *doses_per_day * SIZE_TIME);
+}
+
+/*
+ * Name:	WriteLog
+ * Use:		Write a log entry to flash
+ * Inputs:	-code:	code identifying the type of log
+ * 			-data:	any data to accompany log
+ * Outputs:	none
+ */
+void WriteLog(uint8_t code, uint8_t data)
+{
+	// get current time
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef sDate;
+	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+
+	Log log;
+	log.code = code;
+	log.data = data;
+	log.year = sDate.Year;
+	log.month = sDate.Month;
+	log.day = sDate.Date;
+	log.hour = sTime.Hours;
+	log.minute = sTime.Minutes;
+	log.second = sTime.Seconds;
+
+	WriteFlash(log_addr, (uint8_t*)&log, SIZE_LOG);
 }
 
 void _WaitForReady()
